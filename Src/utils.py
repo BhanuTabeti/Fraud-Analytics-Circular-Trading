@@ -31,6 +31,15 @@ def GenGraph(data) :
     mtrx = np.zeros((n,n), dtype="float_")
     for pt in data :
         mtrx[int(pt[0]-1), int(pt[1]-1)] += pt[2]
-        mtrx[int(pt[1]-1), int(pt[0]-1)] = mtrx[int(pt[0]-1), int(pt[1]-1)] 
+        mtrx[int(pt[1]-1), int(pt[0]-1)] = mtrx[int(pt[0]-1), int(pt[1]-1)]
 
     return mtrx
+
+def Compress(data) :
+    s = set()
+
+    for pt in data :
+        s.add((pt[0], pt[1]))
+        s.add((pt[1], pt[0]))
+
+    return s
