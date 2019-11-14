@@ -1,18 +1,17 @@
 import time
 import numpy as np
-from Src.utils import Read
+from Src.utils import Read, GetNodeCnt, GenGraph
 from Src.cluster import SpectralClustering, KMeans
 
 if __name__ == "__main__" :
-    # data = Read("./Resources/dataset.csv", describe=True)
-    # data = np.random.rand(2500, 2500)
-    # values, vectors = SpectralClustering(data, 1)
-    # clusters = KMeans(vectors, k=2)
+    data = Read("./Resources/dataset.csv", describe=True)
+    W = GenGraph(data)
 
-    begin = time.time()
-    for _ in range(30000) :
-        foo = np.random.rand(1000, 1000)
-        bar = foo*foo
-    end = time.time()
+    values, vectors = SpectralClustering(data, vectors=1)
 
-    print("%.10f" %(end-begin))
+    print(values)
+    print(vectors)
+
+    clusters = KMeans(vectors, k=2)
+
+    print(clusters)
