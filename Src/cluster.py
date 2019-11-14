@@ -10,13 +10,8 @@ def SpectralClustering(W, vectors=2) :
     # Diagonal Matrix
     D = np.diag(np.sum(W, axis=1))
 
-    print(D)
-
     # Laplacian
     D = D-W
-
-    print(D)
-    print(W)
 
     # Eigenvalue, eigenvector pair
     return eigh(D, eigvals=(0, vectors-1))
