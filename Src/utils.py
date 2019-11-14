@@ -31,5 +31,6 @@ def GenGraph(data) :
     mtrx = np.zeros((n,n), dtype="float_")
     for pt in data :
         mtrx[int(pt[0]-1), int(pt[1]-1)] += pt[2]
+        mtrx[int(pt[1]-1), int(pt[0]-1)] = mtrx[int(pt[0]-1), int(pt[1]-1)] 
 
     return mtrx
