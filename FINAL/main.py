@@ -93,40 +93,40 @@ if __name__ == "__main__" :
 
     print("SNN took %.10f seconds." %(end-start))
 
-        
-    # Initialzing cluster representatives and sizes
-    leaders = np.array((range(n)))
-    sizes = np.ones(n)
-
-    # We found that this threshold is good after some analysis
-    thresh = 6
-
-    # Timing the clustering process based on the current threshold
-    start = time.time()
-    for i in range(thresh, n) :
-        for j in sets[i] :
-            Merge(j[0], j[1])
-    end = time.time()
-
-    print("Clustering took %.10f seconds." %(end-start))
-
-    # The clusters generated
-    final = np.array([GetLeader(_) for _ in range(n)], dtype="int")
-
-    # Graphs corresponding to clusters
-    graphs, indices, clusters = ClusterGraph(final)
-
-    # print(clusters)
-
     fraud = set()
-    for cluster, graph in graphs.items() :
-        # If cluster is not empty
-        if len(graph) != 0 :
-            _, fraudNodes = FindCycles(graph)
+    for thresh in range(2, 21) :    
+        # Initialzing cluster representatives and sizes
+        leaders = np.array((range(n)))
+        sizes = np.ones(n)
 
-            # If node from the cluster has it's mapped index in the fraud nodes
-            for node in clusters[cluster] :
-                if indices[node] in fraudNodes :
-                    fraud.add(node)
+        # We found that this threshold is good after some analysis
+        # thresh = 6
+
+        # Timing the clustering process based on the current threshold
+        start = time.time()
+        for i in range(thresh, n) :
+            for j in sets[i] :
+                Merge(j[0], j[1])
+        end = time.time()
+
+        print("Clustering took %.10f seconds." %(end-start))
+
+        # The clusters generated
+        final = np.array([GetLeader(_) for _ in range(n)], dtype="int")
+
+        # Graphs corresponding to clusters
+        graphs, indices, clusters = ClusterGraph(final)
+
+        # print(clusters)
+        
+        for cluster, graph in graphs.items() :
+            # If cluster is not empty
+            if len(graph) != 0 :
+                _, fraudNodes = FindCycles(graph)
+
+                # If node from the cluster has it's mapped index in the fraud nodes
+                for node in clusters[cluster] :
+                    if indices[node] in fraudNodes :
+                        fraud.add(node)
 
     print(len(fraud))
