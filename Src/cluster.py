@@ -4,6 +4,7 @@ from .utils import GetNodeCnt, Compress
 from sklearn.cluster import KMeans as kmeans
 
 def KMeans(data, k=10) :
+    # Performs clustering and returns the labels
     clusters = kmeans(n_clusters=k, init="k-means++").fit(data)
     return clusters.labels_
 
@@ -25,16 +26,19 @@ def SNN(data) :
     data = Compress(data)
 
     # Empty neighbor matrix
-    W = np.zeros((n, n))
+    W = np.zeros((n, n), dtype="int")
 
     # Dictonary of neighbors
     d = {}
     for _ in range(n) :
         d[_] = []
 
-    # Iterating data to populate neighbors
+    # Iterating data to populate incoming edges to a node
     for pt in data :
-        d[int(pt[0])-1].append(int(pt[1])-1)
+        d[int(pt[1])-1].append(int(pt[0])-1)
+
+    # Optimization we came up with to exploit sparsity of the matrix
+    sets = [set() for _ in range(n)]
 
     # For every pair of neighbors of the current vertex, add 1 to the corresponding entry
     for key, value in d.items() :
@@ -42,3 +46,14 @@ def SNN(data) :
             for j in range(i+1, len(value)) :
                 W[value[i], value[j]] += 1
                 W[value[j], value[i]] += 1
+
+                # Remove from the previous set
+                if W[value[i], value[j]] > 1 :
+                    sets[W[value[i], value[j]]-1].remove((value[i], value[j]))
+                    sets[W[value[i], value[j]]-1].remove((value[j], value[i]))
+
+                # Add to the current set
+                sets[W[value[i], value[j]]].add((value[i], value[j]))
+                sets[W[value[i], value[j]]].add((value[j], value[i]))
+
+    return W, n, sets

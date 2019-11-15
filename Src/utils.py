@@ -27,7 +27,7 @@ def GenGraph(data) :
     # Number of nodes
     n = GetNodeCnt(data)
 
-    # generate matrix
+    # generate matrix, undirected for clusters
     mtrx = np.zeros((n,n), dtype="float_")
     for pt in data :
         mtrx[int(pt[0]-1), int(pt[1]-1)] += pt[2]
@@ -38,8 +38,10 @@ def GenGraph(data) :
 def Compress(data) :
     s = set()
 
+    # Removing repeated edges
     for pt in data :
-        s.add((pt[0], pt[1]))
-        s.add((pt[1], pt[0]))
+        # Removing self edges and zero transactions
+        if pt[0] != pt[1] and pt[2] != 0 :
+            s.add((pt[0], pt[1]))
 
     return s
