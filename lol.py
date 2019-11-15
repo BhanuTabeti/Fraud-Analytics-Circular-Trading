@@ -26,13 +26,20 @@ if __name__ == "__main__" :
     W, n = SNN(data)
     print(W)
 
-    leaders = np.array((range(n)))
-    sizes = np.ones(n)
 
-    thresh = 1
-    for i in range(n) :
-        for j in range(i+1, n) :
-            if W[i][j] > thresh :
-                Merge(i, j)
+    for thresh in range(n) :
+        leaders = np.array((range(n)))
+        sizes = np.ones(n)
 
-    print(leaders)
+        for i in range(n) :
+            for j in range(i+1, n) :
+                if W[i][j] >= thresh :
+                    Merge(i, j)
+
+        with open("./Resources/SNN_"+str(thresh)+".txt", "w") as f :
+            for x in leaders :
+                f.write("%d "%x)
+
+        print("#"*100)
+        print(thresh)
+        print(leaders)
