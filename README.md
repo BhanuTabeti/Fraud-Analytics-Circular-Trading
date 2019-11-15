@@ -37,14 +37,14 @@ One more thing to note is that adjacency matrix gives us all paths of length 1. 
 ## Statistics
 
 ### Execution time vs threshold:
-![](./Images/time.jpeg)
+![](./images/time.jpeg)
 <br>
 
 ### Maximal cluster size vs threshold:
-![](./Images/maximal.jpeg)
+![](./images/maximal.jpeg)
 
 ### Number of clusters vs threshold:
-![](./Images/total.jpeg)
+![](./images/total.jpeg)
 <br>
 <br>
 
@@ -54,4 +54,4 @@ This behavior is expected. As we increase the threshold, more and more informati
 
 We plotted a bar chart showing the number of frauds detected at a particular threshold. Since the frauds may repeat across thresholds, we took the union of all the thresholds and found 1982 frauds. The plot is shown below.
 
-![](./Images/frauds.png)
+![](./images/frauds.png)
