@@ -2,6 +2,11 @@
 
 In this we try to bring out the companies that have participated in fradulent transactions and to find that out we have focused on the concept of circular trading as explained in the initial report. So the problem finally boils down to finding loops/cycles in the graph of transactions. As the data we used comprises of 708466 transactions and 32449 nodes, it wouldn't be possible to find all the nodes companies involved in cycles with the avaliable computational resourses. So we have developed an algorithm, which takes into consideration the loss of data while compression of the graph as well as multiple optimal compressions which fit in the RAM, to detect these potential fraudulent companies.
 
+## Execution
+```shell
+$ python main.py
+```
+
 ## Clustering
 
 Detecting cycles on such a massive transaction data is highly time taking so we first try to group the tractions using two different clustering algorithms.
