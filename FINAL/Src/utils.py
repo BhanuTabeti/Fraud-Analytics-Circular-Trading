@@ -11,7 +11,13 @@ def Read(path, describe=False, head=False) :
     if head is True :
         print(df[0:5])
 
-    return df.to_numpy()
+    # Adjusting indices
+    df = df.to_numpy()
+    for i in range(len(df)) :
+        df[i][0] -= 1
+        df[i][1] -= 1
+
+    return df
 
 def GetNodeCnt(data) :
     # Adding vertices to a set from the set of edges

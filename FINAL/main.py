@@ -27,9 +27,60 @@ def Merge(a, b) :
             sizes[lB] += sizes[lA]
             leaders[lA] = lB
 
+def ClusterGraph(clusters) :
+    # Used in generating mapping
+    index = np.zeros(n, dtype="int")
+
+    # Keeps track of which nodes are in a cluster
+    dictCluster = {}
+    for _ in range(n) :
+        dictCluster[_] = []
+
+    # Holds mapping in a cluster
+    dictMap = {}
+    for (node, cluster) in zip(range(n), clusters) :
+        dictMap[node] = index[cluster]
+        dictCluster[cluster].append(node)
+        index[cluster] += 1
+
+    # Holds matrix for a cluster
+    dictMatrix = {}
+    for (cluster, clusterSize) in zip(range(n), index) :
+        dictMatrix[cluster] = np.zeros((clusterSize, clusterSize), dtype="float_")
+
+    # Populating the matrix
+    for pt in data :
+        if pt[0] != pt[1] and pt[2] != 0 and clusters[int(pt[0])] == clusters[int(pt[1])] :
+            dictMatrix[clusters[int(pt[0])]][dictMap[int(pt[0])]][dictMap[int(pt[1])]] += 1
+
+    return dictMatrix, dictMap, dictCluster
+
+def FindCycles(graph, maxLen = 2) :
+    # To not overwrite graph
+    tmp = graph
+
+    # Optimizing cycle length
+    maxLen = min(maxLen, len(graph))
+
+    # Keeps track frauds relative to the current indexing
+    fraud = []
+
+    # Generating _ length paths
+    for _ in range(maxLen+1) :
+        # Cheking if a cycle of length _ exists 
+        for i in range(len(graph)) :
+            if tmp[i][i] != 0 :
+                fraud.append(i)
+
+        # Generating next length paths
+        tmp = tmp@graph
+
+    return tmp, fraud
+
+
 if __name__ == "__main__" :
     # Dummy dataset
-    # data = np.array([[1,2,100], [2,3,200], [2,4,100], [3,1,1], [4,3,4]])
+    # data = np.array([[0,1,100], [1,2,200], [1,3,100], [2,0,1], [3,2,4], [3,1,50]])
     
     # Read the dataset
     data = Read("./Resources/dataset.csv", describe=True)
@@ -39,37 +90,43 @@ if __name__ == "__main__" :
     W, n, sets = SNN(data)
     end = time.time()
 
-    print("SNN took %.10f" %(end-start))
 
-    table = []
-    # Trying various thresholds
-    for thresh in range(1, 20) :
-        # Initialzing cluster representatives and sizes
-        leaders = np.array((range(n)))
+    print("SNN took %.10f seconds." %(end-start))
 
-        sizes = np.ones(n)
-
-        # Timing the clustering process based on the current threshold
-        start = time.time()
-        for i in range(thresh, n) :
-            for j in sets[i] :
-                Merge(j[0], j[1])
-        end = time.time()
-
-        print("Merge took %.10f" %(end-start))
-
-        final = [GetLeader(_) for _ in range(n)]
-        # with open("./Resources/SNN_"+str(thresh)+".txt", "w") as f :
-        #     for x in final :
-        #         f.write("%d "%x)
         
-        # Obtaining counts for analysis
-        unique, counts = np.unique(final, return_counts=True)
-        table.append([thresh, (end-start), np.amax(counts), len(unique)])
+    # Initialzing cluster representatives and sizes
+    leaders = np.array((range(n)))
+    sizes = np.ones(n)
 
-        print("Threshold %d completed."%thresh)
+    # We found that this threshold is good after some analysis
+    thresh = 6
 
-    # Showing statistics
-    print(pd.DataFrame(table, columns=["Threshold", "Time", "Maximal cluster", "Total Clusters"]))
+    # Timing the clustering process based on the current threshold
+    start = time.time()
+    for i in range(thresh, n) :
+        for j in sets[i] :
+            Merge(j[0], j[1])
+    end = time.time()
 
+    print("Clustering took %.10f seconds." %(end-start))
 
+    # The clusters generated
+    final = np.array([GetLeader(_) for _ in range(n)], dtype="int")
+
+    # Graphs corresponding to clusters
+    graphs, indices, clusters = ClusterGraph(final)
+
+    # print(clusters)
+
+    fraud = set()
+    for cluster, graph in graphs.items() :
+        # If cluster is not empty
+        if len(graph) != 0 :
+            _, fraudNodes = FindCycles(graph)
+
+            # If node from the cluster has it's mapped index in the fraud nodes
+            for node in clusters[cluster] :
+                if indices[node] in fraudNodes :
+                    fraud.add(node)
+
+    print(len(fraud))

@@ -35,7 +35,7 @@ def SNN(data) :
 
     # Iterating data to populate incoming edges to a node
     for pt in data :
-        d[int(pt[1])-1].append(int(pt[0])-1)
+        d[int(pt[1])].append(int(pt[0]))
 
     # Optimization we came up with to exploit sparsity of the matrix
     sets = [set() for _ in range(n)]
