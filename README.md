@@ -3,11 +3,11 @@ Fraud Analytics Using Predictive and Social Network Techniques
 
 # Introduction
 
-In this we try to find out the fradulent transactions and to find that out we have focused on the concept of circular trading as explained in the initial report. So the problem finally boils down to finding loops/cycle in the graph of transactions. As the data we used comprises of ___ number of transactions and it wouldn't be possible to find all the loops/cycles with the present avaliable computational speed. So we have put together the following code to detect these potential fraudulent transactions.
+In this we try to bring out the companies that have participated in fradulent transactions and to find that out we have focused on the concept of circular trading as explained in the initial report. So the problem finally boils down to finding loops/cycles in the graph of transactions. As the data we used comprises of ___ number of transactions and it wouldn't be possible to find all the loops/cycles with the present avaliable computational resourses. So we have developed the following algorithm, which takes into consideration the loss of data while compression of the graph as well as the optimal compression which fits in the RAM, to detect these potential fraudulent transactions.
 
-## Getting Started
+## Cycle Detection
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+Detecting cycles on such a massive transaction data is highly time taking so we first try to group th tractions using two different clustering jaf
 
 ### Prerequisites
 
