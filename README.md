@@ -7,21 +7,21 @@ In this we try to bring out the companies that have participated in fradulent tr
 
 ## Cycle Detection
 
-Detecting cycles on such a massive transaction data is highly time taking so we first try to group th tractions using two different clustering jaf
+Detecting cycles on such a massive transaction data is highly time taking so we first try to group the tractions using two different clustering algorithms.
+* Spectral Clustering
+* SNN
 
-### Prerequisites
+### Spectral Clustering
 
-What things you need to install the software and how to install them
+We first started off using spectral clustering but then found out that the computation of the eigen values of the lapacian was using up the avaliable resorces and thus ended up aborting the spectral clustering method to find clusters. 
 
 ```
 Give examples
 ```
 
-### Installing
+### SNN
 
-A step by step series of examples that tell you how to get a development env running
-
-Say what the step will be
+Shared Nearest Neighbor (SNN) is a solution to clustering high-dimensional data with the ability to find clusters of varying density. SNN assigns objects to a cluster, which share a large number of their nearest neighbors. We try to group the transactions and then operate on different clusters to find/detect cycles.
 
 ```
 Give the example
