@@ -1,9 +1,8 @@
 import time
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-from Src.cluster import SNN
-from Src.utils import Read, GetNodeCnt
+from src.cluster import SNN
+from src.utils import Read, GetNodeCnt
 
 # Used in clustering
 leaders, sizes = None, None
@@ -28,27 +27,84 @@ def Merge(a, b) :
             sizes[lB] += sizes[lA]
             leaders[lA] = lB
 
+def ClusterGraph(clusters) :
+    # Used in generating mapping
+    index = np.zeros(n, dtype="int")
+
+    # Keeps track of which nodes are in a cluster
+    dictCluster = {}
+    for _ in range(n) :
+        dictCluster[_] = []
+
+    # Holds mapping in a cluster
+    dictMap = {}
+    for (node, cluster) in zip(range(n), clusters) :
+        dictMap[node] = index[cluster]
+        dictCluster[cluster].append(node)
+        index[cluster] += 1
+
+    # Holds matrix for a cluster
+    dictMatrix = {}
+    for (cluster, clusterSize) in zip(range(n), index) :
+        dictMatrix[cluster] = np.zeros((clusterSize, clusterSize), dtype="float_")
+
+    # Populating the matrix
+    for pt in data :
+        if pt[0] != pt[1] and pt[2] != 0 and clusters[int(pt[0])] == clusters[int(pt[1])] :
+            dictMatrix[clusters[int(pt[0])]][dictMap[int(pt[0])]][dictMap[int(pt[1])]] += 1
+
+    return dictMatrix, dictMap, dictCluster
+
+def FindCycles(graph, maxLen = 2) :
+    # To not overwrite graph
+    tmp = graph
+
+    # Optimizing cycle length
+    maxLen = min(maxLen, len(graph))
+
+    # Keeps track frauds relative to the current indexing
+    fraud = []
+
+    # Generating _ length paths
+    for _ in range(maxLen+1) :
+        # Cheking if a cycle of length _ exists 
+        for i in range(len(graph)) :
+            if tmp[i][i] != 0 :
+                fraud.append(i)
+
+        # Generating next length paths
+        tmp = tmp@graph
+
+    return tmp, fraud
+
+
 if __name__ == "__main__" :
     # Dummy dataset
-    # data = np.array([[1,2,100], [2,3,200], [2,4,100], [3,1,1], [4,3,4]])
+    # data = np.array([[0,1,100], [1,2,200], [1,3,100], [2,0,1], [3,2,4], [3,1,50]])
     
     # Read the dataset
-    data = Read("./Resources/dataset.csv", describe=True)
+    data = Read("./resources/dataset.csv", describe=False)
 
     # Timing SNN implementation
     start = time.time()
     W, n, sets = SNN(data)
     end = time.time()
 
-    print("SNN took %.10f" %(end-start))
 
-    table = []
-    # Trying various thresholds
-    for thresh in range(1, 20) :
+    print("SNN took %.10f seconds." %(end-start))
+
+    fraud = set()
+
+    for thresh in range(1, 21) :
+        # For this particular threshold
+        localFraud = set()    
+
         # Initialzing cluster representatives and sizes
         leaders = np.array((range(n)))
-
         sizes = np.ones(n)
+
+        # We found that this threshold is good after some analysis
+        # thresh = 6
 
         # Timing the clustering process based on the current threshold
         start = time.time()
@@ -57,27 +113,30 @@ if __name__ == "__main__" :
                 Merge(j[0], j[1])
         end = time.time()
 
-        print("Merge took %.10f" %(end-start))
+        print("Clustering took %.10f seconds." %(end-start))
 
-        final = [GetLeader(_) for _ in range(n)]
-        # with open("./Resources/SNN_"+str(thresh)+".txt", "w") as f :
-        #     for x in final :
-        #         f.write("%d "%x)
+        # The clusters generated
+        final = np.array([GetLeader(_) for _ in range(n)], dtype="int")
+
+        # Graphs corresponding to clusters
+        graphs, indices, clusters = ClusterGraph(final)
+
+        # print(clusters)
         
-        # Obtaining counts for analysis
-        unique, counts = np.unique(final, return_counts=True)
-        table.append([thresh, (end-start), np.amax(counts), len(unique)])
+        for cluster, graph in graphs.items() :
+            # If cluster is not empty
+            if len(graph) != 0 :
+                _, fraudNodes = FindCycles(graph)
 
-        print("Threshold %d completed."%thresh)
+                # If node from the cluster has it's mapped index in the fraud nodes
+                for node in clusters[cluster] :
+                    if indices[node] in fraudNodes :
+                        fraud.add(node)
+                        localFraud.add(node+1)
 
-    # Showing statistics
-    df = pd.DataFrame(table, columns=["Threshold", "Time", "Maximal_cluster", "Total Clusters"])
-    print(df)
-    # ax = plt.gca()
+        with open("./output/fraud_threshold_"+str(thresh)+".csv", "w") as f :
+            for fraudOrg in localFraud :
+                f.write("%d\n" %fraudOrg)
 
-    # df.plot(kind='line',x='Threshold',y='Total Clusters', color='green',ax=ax)
-    # # df.plot(kind='line',x='Threshold',y='Maximal_cluster', color='red', ax=ax)
-    # plt.title("Variation of Total Clusters with Threshold")
-    # plt.ylabel("Total Clusters")
 
-    # plt.show()
+    print(len(fraud))
